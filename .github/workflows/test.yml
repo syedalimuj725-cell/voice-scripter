@@ -1,0 +1,50 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.label }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shell: pwsh
+            label: PowerShell 7
+          - shell: powershell
+            label: Windows PowerShell 5.1
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester 5 and PSScriptAnalyzer
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: PSScriptAnalyzer (errors fail the build)
+        run: |
+          $all = Invoke-ScriptAnalyzer -Path ./Start-VoiceScripter.ps1 -Severity Error, Warning
+          $all | Format-Table Line, Severity, RuleName, Message -AutoSize | Out-String -Width 200 | Write-Host
+          $errors = @($all | Where-Object Severity -eq 'Error')
+          Write-Host "PSScriptAnalyzer: $($errors.Count) errors, $(@($all).Count - $errors.Count) warnings"
+          if ($errors.Count -gt 0) { exit 1 }
+
+      - name: Pester unit tests
+        run: |
+          Import-Module Pester -MinimumVersion 5.5.0
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = './tests'
+          $cfg.Run.Exit = $true
+          $cfg.Output.Verbosity = 'Detailed'
+          Invoke-Pester -Configuration $cfg

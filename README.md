@@ -1,5 +1,7 @@
 # VoiceScripter
 
+[![Tests](https://github.com/syedalimuj725-cell/voice-scripter/actions/workflows/test.yml/badge.svg)](https://github.com/syedalimuj725-cell/voice-scripter/actions/workflows/test.yml)
+
 Speak an IT task out loud. Get a reviewed PowerShell script back.
 
 VoiceScripter is a single PowerShell script. It listens to your voice, sends the request to the Anthropic API, and writes a clean `.ps1` file for you to review. It never runs anything on its own.
@@ -55,6 +57,20 @@ Say "end of request" when you finish talking.
 | `-ListenTimeoutSeconds` | `20` | Silence before listening stops |
 | `-TypeInstead` | off | Type the request instead of speaking |
 | `-Model` | `claude-sonnet-4-6` | Model to use |
+
+## Testing
+
+Every push runs automatic tests on Windows, in both Windows PowerShell 5.1 and PowerShell 7:
+
+- **PSScriptAnalyzer:** any error-level issue fails the build.
+- **Pester unit tests:** these check the API request, the code-fence cleanup, the API key lookup, and the safety rules. They mock the API, so no key or microphone is needed.
+
+Run them yourself:
+
+```powershell
+Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser
+Invoke-Pester ./tests
+```
 
 ## Data note
 
