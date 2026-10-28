@@ -19,6 +19,8 @@
                   Set-Secret -Name AnthropicApiKey -Secret 'sk-ant-...'
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '',
+    Justification = 'Interactive console tool: colored status output is for the person at the keyboard, not the pipeline.')]
 [CmdletBinding()]
 param(
     # Where generated scripts land.
@@ -48,7 +50,9 @@ function Get-ApiKey {
     if (Get-Command Get-Secret -ErrorAction SilentlyContinue) {
         try {
             return (Get-Secret -Name AnthropicApiKey -AsPlainText -ErrorAction Stop)
-        } catch { }
+        } catch {
+            Write-Verbose "No 'AnthropicApiKey' secret available: $($_.Exception.Message)"
+        }
     }
 
     throw "No API key found. Set `$env:ANTHROPIC_API_KEY or store a secret named 'AnthropicApiKey'."

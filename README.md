@@ -62,7 +62,7 @@ Say "end of request" when you finish talking.
 
 Every push runs automatic tests on Windows, in both Windows PowerShell 5.1 and PowerShell 7:
 
-- **PSScriptAnalyzer:** any error-level issue fails the build.
+- **PSScriptAnalyzer:** any error or warning fails the build.
 - **Pester unit tests:** these check the API request, the code-fence cleanup, the API key lookup, and the safety rules. They mock the API, so no key or microphone is needed.
 
 Run them yourself:
